@@ -2,17 +2,29 @@ use strict;
 use warnings;
 use Text::CSV;
 
+# Check if an argument was passed
+my ($inputMonth, $inputFile);
+if (@ARGV) {
+    # Assign the first argument to a variable
+    $inputFile = $ARGV[0];
+} else {
+    print "Please provide an input value.\n";
+    exit;
+}
+
+# Check if the file exists and provide proper error message if not 
+unless (-e "/project/scv/dugan/sge/data/$inputFile") {
+    die "The input file '$inputFile' does not exist.\n";
+}
+
 my $csv = Text::CSV->new({ binary => 1, eol => "\n" });
 
-my @files = ("2401.h");
+open my $fh, ">", "$inputFile.csv" or die "Could not open file: $!";  # File to write to
 
-open my $fh, ">", "hfiles.csv" or die "Could not open file: $!";  # File to write to
-foreach my $file (@files) {
-
-    my $file_path = "/project/scv/dugan/sge/data/$file";
+    my $file_path = "/project/scv/dugan/sge/data/$inputFile";
     open(my $filehandle, '<', $file_path) or die "Could not open file '$file_path': $!";
     
-    <$filehandle>;
+    <$filehandle>; # skip header
     
     my ($time, $host, $cores, $MEMTOT, $MEMUSE, $queue, $used, $drained);
 
@@ -37,6 +49,6 @@ foreach my $file (@files) {
     }
 
     close $filehandle;
-}
+
 
 close $fh;
